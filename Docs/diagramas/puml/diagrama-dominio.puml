@@ -137,9 +137,9 @@ Evento --> EstadoEvento : estado >
 OrdenCompra --> EstadoOrden : estado >
 
 ' --- Las 4 reglas de negocio del enunciado, como metodos ---
-OrdenCompra ..> CalculadoraTarifaria : R2 tarifa por volumen >
+OrdenCompra ..> CalculadoraTarifaria : R1 tarifa por volumen >
 OrdenCompra ..> ValidadorLimites : R3 tope de 6 >
-OrdenCompra ..> PoliticaExpiracion : R1 bloqueo 10 min >
+OrdenCompra ..> PoliticaExpiracion : R2 bloqueo 10 min >
 Boleto ..> GeneradorFirma : R4 firma SHA-256 >
 CalculadoraTarifaria ..> ResultadoCalculo : devuelve >
 
@@ -158,14 +158,14 @@ note bottom of domain.model
 end note
 
 note right of CalculadoraTarifaria
-  <b>R2 — Regla de tramos</b>
+  <b>R1 — Regla de tramos</b>
   1-2 boletas: 10% tarifa, 0% dto.
   3-5 boletas: 8% tarifa, 5% dto.
   6 o mas: 5% tarifa, 10% dto.
 end note
 
 note right of PoliticaExpiracion
-  <b>R1 — Bloqueo temporal</b>
+  <b>R2 — Bloqueo temporal</b>
   10 minutos estrictos.
   Si el pago no llega antes,
   los asientos se liberan.
