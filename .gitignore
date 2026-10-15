@@ -1,0 +1,27 @@
+# PlantUML se descarga, no se versiona (son 30 MB).
+plantuml.jar
+plantuml.jar.*
+
+# Java / Maven
+target/
+*.class
+*.jar
+!/.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+nbproject/private/
+
+# Sistema
+Thumbs.db
+.DS_Store
+
+# Datos locales: la base SQLite se crea sola al arrancar.
+datos/
+*.db
+*.sqlite
