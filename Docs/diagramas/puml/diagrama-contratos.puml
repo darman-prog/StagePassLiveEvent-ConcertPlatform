@@ -37,6 +37,9 @@ package "ports.out" #D6EAF8 {
     +void guardar(Boleto boleto) : void
     +Boleto buscarPorCodigo(String codigoRedencion) : Boleto
   }
+  interface ClienteRepository <<Puerto secundario>> {
+    +Cliente buscarPorId(String clienteId) : Cliente
+  }
   interface PaymentGateway <<Puerto secundario>> {
     +ReferenciaPago registrarPago(SolicitudPago solicitud) : ReferenciaPago
     +EstadoPago consultarEstado(ReferenciaPago referencia) : EstadoPago
@@ -83,6 +86,7 @@ package "infrastructure" #D5F5E3 {
   class ReservasJob <<Adaptador primario>>
   class ManejadorExcepcionesGlobal
   class SqliteAsientoRepository <<Adaptador secundario>>
+  class SqliteClienteRepository <<Adaptador secundario>>
   class MongoOrdenRepository <<Adaptador secundario>>
   class MongoBoletoRepository <<Adaptador secundario>>
   class QrTicketGenerator <<Adaptador secundario>> <<mock>>
@@ -103,17 +107,23 @@ ValidacionUseCase <|.. ValidarBoleto
 MantenimientoUseCase <|.. ExpirarReservas
 
 ' --- Los casos de uso dependen de los puertos secundarios, nunca de los adaptadores ---
-IniciarCompra ..> AsientoRepository : usa >
-IniciarCompra ..> OrdenRepository : usa >
-IniciarCompra ..> Reloj : usa >
-ConfirmarPago ..> PaymentGateway : usa >
-ConfirmarPago ..> TicketGenerator : usa >
-ConfirmarPago ..> BoletoRepository : usa >
-ConfirmarPago ..> Notificador : usa >
-ConfirmarPago ..> FacturaEmitter : usa >
-ExpirarReservas ..> OrdenRepository : usa >
-ExpirarReservas ..> AsientoRepository : usa >
-ValidarBoleto ..> BoletoRepository : usa >
+  IniciarCompra ..> AsientoRepository : usa >
+  IniciarCompra ..> OrdenRepository : usa >
+  IniciarCompra ..> ClienteRepository : usa >
+  IniciarCompra ..> Reloj : usa >
+  ConfirmarPago ..> PaymentGateway : usa >
+  ConfirmarPago ..> TicketGenerator : usa >
+  ConfirmarPago ..> OrdenRepository : usa >
+  ConfirmarPago ..> AsientoRepository : usa >
+  ConfirmarPago ..> BoletoRepository : usa >
+  ConfirmarPago ..> Notificador : usa >
+  ConfirmarPago ..> FacturaEmitter : usa >
+  ConfirmarPago ..> Reloj : usa >
+  ExpirarReservas ..> OrdenRepository : usa >
+  ExpirarReservas ..> AsientoRepository : usa >
+  ExpirarReservas ..> Reloj : usa >
+  ValidarBoleto ..> BoletoRepository : usa >
+  ValidarBoleto ..> OrdenRepository : usa >
 PaymentGateway --> SolicitudPago
 PaymentGateway --> ReferenciaPago
 PaymentGateway --> EstadoPago
@@ -123,7 +133,8 @@ CheckoutController ..|> CheckoutUseCase : invoca >
 PagosController ..|> PagosUseCase : invoca >
 ValidacionController ..|> ValidacionUseCase : invoca >
 ReservasJob ..|> MantenimientoUseCase : invoca >
-SqliteAsientoRepository ..|> AsientoRepository : implementa >
+  SqliteAsientoRepository ..|> AsientoRepository : implementa >
+  SqliteClienteRepository ..|> ClienteRepository : implementa >
 MongoOrdenRepository ..|> OrdenRepository : implementa >
 MongoBoletoRepository ..|> BoletoRepository : implementa >
 QrTicketGenerator ..|> TicketGenerator : implementa >

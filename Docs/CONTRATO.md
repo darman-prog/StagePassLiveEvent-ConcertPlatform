@@ -229,6 +229,15 @@ void guardar(Boleto boleto);
 Boleto buscarPorCodigo(String codigoRedencion);
 ```
 
+### `ClienteRepository`
+
+```java
+Cliente buscarPorId(String clienteId);
+```
+
+Puerto agregado al cerrar el núcleo: la `OrdenCompra` compone al `Cliente` y las notificaciones
+usan su correo, así que el núcleo necesita recuperarlo por id. Lo resuelve el catálogo legacy.
+
 ### `PaymentGateway`
 
 ```java
@@ -341,6 +350,7 @@ record Comprobante(String numero, String url) {}
 | Adaptador | Puerto que implementa | Estado |
 |---|---|---|
 | `SqliteAsientoRepository` | `AsientoRepository` | **real** |
+| `SqliteClienteRepository` | `ClienteRepository` | **real** |
 | `MongoOrdenRepository` | `OrdenRepository` | **real** |
 | `MongoBoletoRepository` | `BoletoRepository` | **real** |
 | `QrTicketGenerator` | `TicketGenerator` | mock |

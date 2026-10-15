@@ -51,6 +51,7 @@ hexagon "NÚCLEO DE DOMINIO\n<<inside>>\n\n<i>domain.model</i>\nEvento · Asient
 interface "AsientoRepository\n<<puerto secundario>>" as S1 #D6EAF8
 interface "OrdenRepository\n<<puerto secundario>>" as S2 #D6EAF8
 interface "BoletoRepository\n<<puerto secundario>>" as S3 #D6EAF8
+interface "ClienteRepository\n<<puerto secundario>>" as S9 #D6EAF8
 interface "Reloj\n<<puerto secundario>>" as S8 #D6EAF8
 interface "PaymentGateway\n<<puerto secundario>>" as S4 #D6EAF8
 interface "TicketGenerator\n<<puerto secundario>>" as S5 #D6EAF8
@@ -88,6 +89,7 @@ P4 <|.. Core
 Core ..> S1
 Core ..> S2
 Core ..> S3
+Core ..> S9
 Core ..> S8
 Core ..> S4
 Core ..> S5
@@ -96,6 +98,7 @@ Core ..> S7
 
 ' ####### LOS ADAPTADORES SECUNDARIOS IMPLEMENTAN LOS PUERTOS #######
 A1 ..|> S1
+A1 ..|> S9
 A2 ..|> S2
 A2 ..|> S3
 A8 ..|> S8
