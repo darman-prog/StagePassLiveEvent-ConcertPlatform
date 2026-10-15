@@ -1,6 +1,9 @@
+# --- Java / Maven ---
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+!/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -32,5 +35,15 @@ build/
 ### VS Code ###
 .vscode/
 
-### Datos locales generados (SQLite crea la base en el directorio de trabajo) ###
+# PlantUML se descarga, no se versiona (son 30 MB).
+plantuml.jar
+plantuml.jar.*
+
+# Sistema
+Thumbs.db
+.DS_Store
+
+# Datos locales generados (SQLite se crea al arrancar).
 *.db
+*.sqlite
+datos/

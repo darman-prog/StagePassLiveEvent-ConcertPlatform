@@ -1,0 +1,168 @@
+﻿@startuml contratos
+
+title <b>Página 3 — Clases de puertos, casos de uso y adaptadores</b> : quién implementa cada contrato
+
+package "ports.in" #D6EAF8 {
+  interface CheckoutUseCase <<Puerto primario>> {
+    +IniciarCompraResponse iniciarCompra(SolicitudCompra solicitud) : IniciarCompraResponse
+    +OrdenCompra seleccionarAsientos(String ordenId, List~String~ asientosId) : OrdenCompra
+  }
+  interface PagosUseCase <<Puerto primario>> {
+    +Boleto confirmarPago(ConfirmacionPago confirmacion) : Boleto
+    +void notificarCambioTransaccion(String pasarela, NotificacionTransaccion n) : void
+  }
+  interface ValidacionUseCase <<Puerto primario>> {
+    +ResultadoValidacion validarBoleto(String codigoRedencion) : ResultadoValidacion
+  }
+  interface MantenimientoUseCase <<Puerto primario>> {
+    +int expirarReservasVencidas() : int
+  }
+}
+
+package "ports.out" #D6EAF8 {
+  interface AsientoRepository <<Puerto secundario>> {
+    +List~Asiento~ listarPorRecinto(String recintoId) : List~Asiento~
+    +Asiento buscarPorId(String asientoId) : Asiento
+    +void bloquear(List~String~ asientosId, Instant hasta) : void
+    +void marcarVendidos(List~String~ asientosId) : void
+    +void liberar(List~String~ asientosId) : void
+  }
+  interface OrdenRepository <<Puerto secundario>> {
+    +void guardar(OrdenCompra orden) : void
+    +OrdenCompra buscarPorId(String ordenId) : OrdenCompra
+    +List~OrdenCompra~ buscarActivasPorClienteYEvento(String clienteId, String eventoId) : List~OrdenCompra~
+    +List~OrdenCompra~ buscarVencidas(Instant ahora) : List~OrdenCompra~
+  }
+  interface BoletoRepository <<Puerto secundario>> {
+    +void guardar(Boleto boleto) : void
+    +Boleto buscarPorCodigo(String codigoRedencion) : Boleto
+  }
+  interface PaymentGateway <<Puerto secundario>> {
+    +ReferenciaPago registrarPago(SolicitudPago solicitud) : ReferenciaPago
+    +EstadoPago consultarEstado(ReferenciaPago referencia) : EstadoPago
+  }
+  interface TicketGenerator <<Puerto secundario>> {
+    +RepresentacionBoleto generar(String codigo, String firmaHash, String url) : RepresentacionBoleto
+  }
+  interface Notificador <<Puerto secundario>> {
+    +void enviar(Notificacion notificacion) : void
+  }
+  interface FacturaEmitter <<Puerto secundario>> {
+    +Comprobante emitir(Factura factura) : Comprobante
+  }
+  interface Reloj <<Puerto secundario>> {
+    +Instant ahora() : Instant
+  }
+  class SolicitudPago <<record>> {
+    +String ordenId
+    +BigDecimal monto
+    +String correoComprador
+  }
+  class ReferenciaPago <<record>> {
+    +String pasarela
+    +String identificadorTransaccion
+  }
+  enum EstadoPago {
+    PENDIENTE
+    APROBADO
+    RECHAZADO
+  }
+}
+
+package "application" #FFF3CD {
+  class IniciarCompra
+  class ConfirmarPago
+  class ExpirarReservas
+  class ValidarBoleto
+}
+
+package "infrastructure" #D5F5E3 {
+  class CheckoutController <<Adaptador primario>>
+  class PagosController <<Adaptador primario>>
+  class ValidacionController <<Adaptador primario>>
+  class ManejadorExcepcionesGlobal
+  class SqliteAsientoRepository <<Adaptador secundario>>
+  class MongoOrdenRepository <<Adaptador secundario>>
+  class MongoBoletoRepository <<Adaptador secundario>>
+  class QrTicketGenerator <<Adaptador secundario>>
+  class SistemaReloj <<Adaptador secundario>>
+  class WompiPaymentGateway <<Adapt. secundario>> <<mock>>
+  class PayPalPaymentGateway <<Adapt. secundario>> <<mock>>
+  class PsePaymentGateway <<Adapt. secundario>> <<mock>>
+  class SendgridNotificador <<Adapt. secundario>> <<mock>>
+  class WhatsappNotificador <<Adapt. secundario>> <<mock>>
+  class DianFacturaEmitter <<Adapt. secundario>> <<mock>>
+  class ConfiguracionSpring
+}
+
+' --- Los casos de uso implementan los puertos primarios ---
+CheckoutUseCase <|.. IniciarCompra
+PagosUseCase <|.. ConfirmarPago
+ValidacionUseCase <|.. ValidarBoleto
+MantenimientoUseCase <|.. ExpirarReservas
+
+' --- Los casos de uso dependen de los puertos secundarios, nunca de los adaptadores ---
+IniciarCompra ..> AsientoRepository : usa >
+IniciarCompra ..> OrdenRepository : usa >
+IniciarCompra ..> Reloj : usa >
+ConfirmarPago ..> PaymentGateway : usa >
+ConfirmarPago ..> TicketGenerator : usa >
+ConfirmarPago ..> BoletoRepository : usa >
+ConfirmarPago ..> Notificador : usa >
+ConfirmarPago ..> FacturaEmitter : usa >
+ExpirarReservas ..> OrdenRepository : usa >
+ExpirarReservas ..> AsientoRepository : usa >
+ValidarBoleto ..> BoletoRepository : usa >
+PaymentGateway --> SolicitudPago
+PaymentGateway --> ReferenciaPago
+PaymentGateway --> EstadoPago
+
+' --- Los adaptadores implementan los puertos ---
+CheckoutController ..|> CheckoutUseCase : invoca >
+PagosController ..|> PagosUseCase : invoca >
+ValidacionController ..|> ValidacionUseCase : invoca >
+SqliteAsientoRepository ..|> AsientoRepository : implementa >
+MongoOrdenRepository ..|> OrdenRepository : implementa >
+MongoBoletoRepository ..|> BoletoRepository : implementa >
+QrTicketGenerator ..|> TicketGenerator : implementa >
+SistemaReloj ..|> Reloj : implementa >
+WompiPaymentGateway ..|> PaymentGateway : implementa >
+PayPalPaymentGateway ..|> PaymentGateway : implementa >
+PsePaymentGateway ..|> PaymentGateway : implementa >
+SendgridNotificador ..|> Notificador : implementa >
+WhatsappNotificador ..|> Notificador : implementa >
+DianFacturaEmitter ..|> FacturaEmitter : implementa >
+ConfiguracionSpring ..> CheckoutController : inyecta >
+
+note bottom of OrdenRepository
+  <b>buscarActivasPorClienteYEvento</b>
+  La necesita la regla de las 6
+  boletas por cliente y evento:
+  hay que sumar las ya aprobadas
+  antes de validar las nuevas.
+end note
+
+note bottom of Reloj
+  <b>Time Provider</b>
+  El núcleo nunca llama a
+  Instant.now(): consulta este
+  puerto. Así los tests fijan la
+  hora con un reloj de mentira
+  en vez de esperar 10 minutos.
+end note
+
+legend bottom
+  |= Color |= Capa |
+  | <#FFE8CC> | Nucleo (inside) |
+  | <#FFF3CD> | Casos de uso |
+  | <#D6EAF8> | Puertos (frontera) |
+  | <#D5F5E3> | Adaptadores (outside) |
+  --
+  <<mock>> = adaptador simulado
+  -- Flecha punteada = usa
+  -- Flecha solida = implementa
+  -- <<puerto primario>> entra al sistema
+  -- <<puerto secundario>> sale del sistema
+endlegend
+
+@enduml

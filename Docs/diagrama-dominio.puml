@@ -1,0 +1,174 @@
+﻿@startuml dominio
+
+title <b>Página 2 — Diagrama de clases del dominio</b> : las 5 entidades del enunciado con sus atributos y métodos
+
+package "domain.model" #FFE8CC {
+
+  class Evento {
+    +String id
+    +String nombre
+    +TipoEvento tipo
+    +String recintoId
+    +LocalDateTime fechaHora
+    +EstadoEvento estado
+    +void cancelar()
+    +void marcarAgotado()
+  }
+
+  class Asiento {
+    +String id
+    +String recintoId
+    +String codigoUbicacion
+    +BigDecimal precioBase
+    +EstadoAsiento estado
+    +Instant bloqueadoHasta
+    +void bloquear(Instant hasta)
+    +void vender()
+    +void liberar()
+    +boolean estaDisponible() : boolean
+    +boolean bloqueoVencido(Instant ahora) : boolean
+  }
+
+  class Cliente {
+    +String id
+    +String nombreCompleto
+    +String correoElectronico
+    +String telefonoMovil
+    +String nacionalidad
+    +boolean correoEsValido() : boolean
+  }
+
+  class OrdenCompra {
+    +String id
+    +String eventoId
+    +Cliente cliente
+    +List~Asiento~ asientos
+    +BigDecimal tarifaServicio
+    +BigDecimal descuentoAplicado
+    +BigDecimal montoTotal
+    +Instant expiraEn
+    +EstadoOrden estado
+    +void aprobar()
+    +void rechazar()
+    +void expirar()
+    +boolean expiro(Instant ahora) : boolean
+  }
+
+  class Boleto {
+    +String id
+    +String ordenId
+    +String codigoRedencion
+    +String firmaHash
+    +Instant fechaEmision
+  }
+
+  enum TipoEvento {
+    CONCIERTO
+    TEATRO
+    FESTIVAL
+  }
+
+  enum EstadoEvento {
+    PROGRAMADO
+    AGOTADO
+    CANCELADO
+  }
+
+  enum EstadoAsiento {
+    DISPONIBLE
+    BLOQUEADO
+    VENDIDO
+  }
+
+  enum EstadoOrden {
+    PENDIENTE_PAGO
+    APROBADA
+    RECHAZADA
+    EXPIRADA
+  }
+}
+
+package "domain.service" #FFE8CC {
+
+  class ResultadoCalculo {
+    +BigDecimal tarifaServicio
+    +BigDecimal descuento
+    +BigDecimal montoTotal
+  }
+
+  class CalculadoraTarifaria {
+    +ResultadoCalculo calcular(int cantidad, BigDecimal subtotal) : ResultadoCalculo
+  }
+
+  class ValidadorLimites {
+    +void validarCompra(String clienteId, String eventoId, int yaAdquiridas, int solicitadas)
+  }
+
+  class GeneradorFirma {
+    +String generar(OrdenCompra orden, String claveSecreta) : String
+    +String generarCodigoRedencion(Boleto boleto) : String
+  }
+
+  class PoliticaExpiracion {
+    +Duration VENTANA_DE_BLOQUEO
+    +Instant calcularVencimiento(Instant inicio) : Instant
+    +boolean expiro(OrdenCompra orden, Instant ahora) : boolean
+  }
+}
+
+package "domain.exception" #FFE8CC {
+  class ExcepcionNegocio
+  class AsientoNoDisponibleException
+  class LimiteBoletasExcedidoException
+  class PagoNoVerificadoException
+  class OrdenExpiradaException
+}
+
+' --- Composicion y agregacion ---
+OrdenCompra "1" *-- "1" Cliente : compra >
+OrdenCompra "1" o-- "*" Asiento : reserva >
+Boleto "0..*" --> "1" OrdenCompra : emitida por >
+Evento ..> Asiento : recintoId >
+
+' --- Enums ---
+Asiento --> EstadoAsiento : estado >
+Evento --> TipoEvento : tipo >
+Evento --> EstadoEvento : estado >
+OrdenCompra --> EstadoOrden : estado >
+
+' --- Las 4 reglas de negocio del enunciado, como metodos ---
+OrdenCompra ..> CalculadoraTarifaria : R2 tarifa por volumen >
+OrdenCompra ..> ValidadorLimites : R3 tope de 6 >
+OrdenCompra ..> PoliticaExpiracion : R1 bloqueo 10 min >
+Boleto ..> GeneradorFirma : R4 firma SHA-256 >
+CalculadoraTarifaria ..> ResultadoCalculo : devuelve >
+
+' --- Jerarquia de excepciones ---
+ExcepcionNegocio <|-- AsientoNoDisponibleException
+ExcepcionNegocio <|-- LimiteBoletasExcedidoException
+ExcepcionNegocio <|-- PagoNoVerificadoException
+ExcepcionNegocio <|-- OrdenExpiradaException
+
+note bottom of domain.model
+  <b>NÚCLEO PURO</b>
+  Todo el dinero en BigDecimal.
+  Todo identificador en String.
+  La entidad se llama OrdenCompra,
+  no Orden (choca con ORDER BY).
+end note
+
+note right of CalculadoraTarifaria
+  <b>R2 — Regla de tramos</b>
+  1-2 boletas: 10% tarifa, 0% dto.
+  3-5 boletas: 8% tarifa, 5% dto.
+  6 o mas: 5% tarifa, 10% dto.
+end note
+
+note right of PoliticaExpiracion
+  <b>R1 — Bloqueo temporal</b>
+  10 minutos estrictos.
+  Si el pago no llega antes,
+  los asientos se liberan.
+end note
+
+@enduml
