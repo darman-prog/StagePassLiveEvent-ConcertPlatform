@@ -22,10 +22,14 @@ los restantes pueden ser mocks".
    ├─ domain/{model, service, exception}   # núcleo: solo imports de java.*
    ├─ application/                         # casos de uso (implementan puertos primarios)
    ├─ ports/{in, out}                      # interfaces puras del dominio
-   ├─ adapters/in/{web, job}               # adaptadores primarios (REST, webhook, scheduler)
-   ├─ adapters/out/...                     # adaptadores secundarios (persistencia, pagos, notificaciones)
-   └─ config/                              # wiring: @Bean que inyecta adaptadores en casos de uso
+   └─ infrastructure/                      # ADAPTADORES (exterior): todo lo tecnológico
+      ├─ in/{web, job}                     # primarios: REST, webhook, scheduler
+      ├─ out/...                           # secundarios: persistencia, pagos, notificaciones
+      └─ config/                           # wiring: @Bean que inyecta adaptadores en casos de uso
    ```
+
+   El paquete exterior se llama `infrastructure` para coincidir con `Docs/CONTRATO.md`
+   (fuente de verdad del equipo).
 
 3. **Adaptadores completamente implementados (4 ≥ mínimo de 2):**
    - REST (controllers de compras + webhook de pagos) — primario.

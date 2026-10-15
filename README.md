@@ -30,10 +30,10 @@ com.stagepass
 ├─ ports/
 │  ├─ in/           # contratos que llaman los adaptadores primarios (web, job)
 │  └─ out/          # contratos que la app necesita (repos, pasarela, notificaciones)
-├─ adapters/
-│  ├─ in/           # REST controllers, webhook de pagos, job de expiración
-│  └─ out/          # SQLite (recintos/asientos), MongoDB (órdenes/boletas), pagos mock, etc.
-└─ config/          # wiring Spring: inyecta adaptadores reales en los casos de uso
+└─ infrastructure/  # ADAPTADORES (exterior): todo lo tecnológico vive aquí
+   ├─ in/           # REST controllers, webhook de pagos, job de expiración
+   ├─ out/          # SQLite (recintos/asientos), MongoDB (órdenes/boletas), pagos mock, etc.
+   └─ config/       # wiring Spring: inyecta adaptadores reales en los casos de uso
 ```
 
 ## Reglas de oro
