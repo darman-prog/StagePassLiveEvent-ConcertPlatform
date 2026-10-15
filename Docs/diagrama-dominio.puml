@@ -171,7 +171,4 @@ note right of PoliticaExpiracion
   los asientos se liberan.
 end note
 
-' ###########################################################################
-' PAGINA 3 DE 3 — CLASES DE PUERTOS, CASOS DE USO Y ADAPTADORES
-' ###########################################################################
 @enduml

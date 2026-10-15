@@ -30,6 +30,7 @@ package "ports.out" #D6EAF8 {
   interface OrdenRepository <<Puerto secundario>> {
     +void guardar(OrdenCompra orden) : void
     +OrdenCompra buscarPorId(String ordenId) : OrdenCompra
+    +List~OrdenCompra~ buscarActivasPorClienteYEvento(String clienteId, String eventoId) : List~OrdenCompra~
     +List~OrdenCompra~ buscarVencidas(Instant ahora) : List~OrdenCompra~
   }
   interface BoletoRepository <<Puerto secundario>> {
@@ -52,7 +53,12 @@ package "ports.out" #D6EAF8 {
   interface Reloj <<Puerto secundario>> {
     +Instant ahora() : Instant
   }
-  class ReferenciaPago {
+  class SolicitudPago <<record>> {
+    +String ordenId
+    +BigDecimal monto
+    +String correoComprador
+  }
+  class ReferenciaPago <<record>> {
     +String pasarela
     +String identificadorTransaccion
   }
@@ -73,10 +79,13 @@ package "application" #FFF3CD {
 package "infrastructure" #D5F5E3 {
   class CheckoutController <<Adaptador primario>>
   class PagosController <<Adaptador primario>>
+  class ValidacionController <<Adaptador primario>>
+  class ManejadorExcepcionesGlobal
   class SqliteAsientoRepository <<Adaptador secundario>>
   class MongoOrdenRepository <<Adaptador secundario>>
   class MongoBoletoRepository <<Adaptador secundario>>
   class QrTicketGenerator <<Adaptador secundario>>
+  class SistemaReloj <<Adaptador secundario>>
   class WompiPaymentGateway <<Adapt. secundario>> <<mock>>
   class PayPalPaymentGateway <<Adapt. secundario>> <<mock>>
   class PsePaymentGateway <<Adapt. secundario>> <<mock>>
@@ -92,7 +101,7 @@ PagosUseCase <|.. ConfirmarPago
 ValidacionUseCase <|.. ValidarBoleto
 MantenimientoUseCase <|.. ExpirarReservas
 
-' --- Los casos de uso dependen de los puertos secundarios, no de los adaptadores ---
+' --- Los casos de uso dependen de los puertos secundarios, nunca de los adaptadores ---
 IniciarCompra ..> AsientoRepository : usa >
 IniciarCompra ..> OrdenRepository : usa >
 IniciarCompra ..> Reloj : usa >
@@ -104,16 +113,19 @@ ConfirmarPago ..> FacturaEmitter : usa >
 ExpirarReservas ..> OrdenRepository : usa >
 ExpirarReservas ..> AsientoRepository : usa >
 ValidarBoleto ..> BoletoRepository : usa >
+PaymentGateway --> SolicitudPago
 PaymentGateway --> ReferenciaPago
 PaymentGateway --> EstadoPago
 
 ' --- Los adaptadores implementan los puertos ---
 CheckoutController ..|> CheckoutUseCase : invoca >
 PagosController ..|> PagosUseCase : invoca >
+ValidacionController ..|> ValidacionUseCase : invoca >
 SqliteAsientoRepository ..|> AsientoRepository : implementa >
 MongoOrdenRepository ..|> OrdenRepository : implementa >
 MongoBoletoRepository ..|> BoletoRepository : implementa >
 QrTicketGenerator ..|> TicketGenerator : implementa >
+SistemaReloj ..|> Reloj : implementa >
 WompiPaymentGateway ..|> PaymentGateway : implementa >
 PayPalPaymentGateway ..|> PaymentGateway : implementa >
 PsePaymentGateway ..|> PaymentGateway : implementa >
@@ -122,13 +134,29 @@ WhatsappNotificador ..|> Notificador : implementa >
 DianFacturaEmitter ..|> FacturaEmitter : implementa >
 ConfiguracionSpring ..> CheckoutController : inyecta >
 
+note bottom of OrdenRepository
+  <b>buscarActivasPorClienteYEvento</b>
+  La necesita la regla de las 6
+  boletas por cliente y evento:
+  hay que sumar las ya aprobadas
+  antes de validar las nuevas.
+end note
+
+note bottom of Reloj
+  <b>Time Provider</b>
+  El núcleo nunca llama a
+  Instant.now(): consulta este
+  puerto. Así los tests fijan la
+  hora con un reloj de mentira
+  en vez de esperar 10 minutos.
+end note
+
 legend bottom
   |= Color |= Capa |
   | <#FFE8CC> | Nucleo (inside) |
   | <#FFF3CD> | Casos de uso |
   | <#D6EAF8> | Puertos (frontera) |
   | <#D5F5E3> | Adaptadores (outside) |
-  | <#EAEDED> | Actores externos |
   --
   <<mock>> = adaptador simulado
   -- Flecha punteada = usa
