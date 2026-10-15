@@ -40,10 +40,11 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
-		<!-- Prueba de aislamiento arquitectonico: el dominio no puede importar nada fuera del JDK. -->
+		<!-- Prueba de aislamiento arquitectonico: el dominio no puede importar nada fuera del JDK.
+		     Se usa la API core desde un test JUnit normal, sin la integracion junit5. -->
 		<dependency>
 			<groupId>com.tngtech.archunit</groupId>
-			<artifactId>archunit-junit5</artifactId>
+			<artifactId>archunit</artifactId>
 			<version>1.3.0</version>
 			<scope>test</scope>
 		</dependency>
