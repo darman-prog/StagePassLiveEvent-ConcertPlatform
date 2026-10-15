@@ -7,7 +7,7 @@ inventarlo.
 Cuándo leerlo: el Integrante 2 antes de escribir el núcleo, el Integrante 3 antes de escribir los
 adaptadores. **Es la fuente de verdad, no el `.puml`.**
 
-Las firmas de este documento y las de `Docs/diagrama-contratos.puml` deben coincidir. Si alguna
+Las firmas de este documento y las de `Docs/diagramas/puml/diagrama-contratos.puml` deben coincidir. Si alguna
 difiere, el que cambió se equivocó y se corrige acá primero.
 
 ---
@@ -127,7 +127,7 @@ Los valores van en `UPPER_SNAKE_CASE`. Sin tildes ni acentos en el código.
 
 Los cinco primeros van en `domain/model/`. **`EstadoPago` NO va en el dominio**: vive en
 `ports/out/` junto al puerto `PaymentGateway`, porque describe el estado de una transacción de
-una pasarela, no un concepto del negocio. Por eso no aparece en `diagrama-dominio.puml`.
+una pasarela, no un concepto del negocio. Por eso no aparece en `Docs/diagramas/puml/diagrama-dominio.puml`.
 
 ---
 

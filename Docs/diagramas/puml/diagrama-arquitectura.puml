@@ -12,7 +12,7 @@
 '  La dependencia de codigo va hacia ADENTRO (el adaptador depende del puerto).
 '  Esa inversion es toda la arquitectura hexagonal.
 '
-'  Para regenerar:  java -jar plantuml.jar -tpng Docs/diagrama-arquitectura.puml
+'  Para regenerar:  java -jar plantuml.jar -tpng Docs/diagramas/puml/diagrama-arquitectura.puml
 ' ============================================================================
 
 left to right direction

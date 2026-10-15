@@ -47,5 +47,6 @@ com.stagepass
 
 - Rama de núcleo: `diego` (estructura base ya en `origin/diego`; haz `git pull` antes de empezar).
 - Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `chore:`) con commits pequeños.
+- Contrato del equipo (firmas y tipos exactos): `Docs/CONTRATO.md`.
 - Decisiones arquitectónicas: `Docs/adr/0001-arquitectura-nucleo.md`.
-- Diagrama de clases del taller: `Docs/` (integrante de diagramas).
+- Diagramas: `Docs/diagramas/` — `puml/` fuente, `png/` y `svg/` exportados.
