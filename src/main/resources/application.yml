@@ -9,10 +9,10 @@ spring:
     url: jdbc:sqlite:stagepass.db
     driver-class-name: org.sqlite.JDBC
 
-  # Mongo para ordenes de compra y boletas emitidas.
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/stagepass
+  # Mongo para ordenes de compra y boletos emitidas. En Spring Boot 4 la clave canonica
+  # es spring.mongodb.uri; la vieja spring.data.mongodb.uri quedo obsoleta.
+  mongodb:
+    uri: mongodb://localhost:27017/stagepass
 
 server:
   port: 8080
