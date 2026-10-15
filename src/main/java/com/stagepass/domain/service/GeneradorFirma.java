@@ -34,7 +34,12 @@ public class GeneradorFirma {
         }
     }
 
+    /** El codigo se deriva del id del boleto; la sobrecarga por id evita construir un Boleto a medias. */
+    public String generarCodigoRedencion(String boletoId) {
+        return "SP-" + boletoId.substring(0, 8).toUpperCase(Locale.ROOT);
+    }
+
     public String generarCodigoRedencion(Boleto boleto) {
-        return "SP-" + boleto.getId().substring(0, 8).toUpperCase(Locale.ROOT);
+        return generarCodigoRedencion(boleto.getId());
     }
 }
