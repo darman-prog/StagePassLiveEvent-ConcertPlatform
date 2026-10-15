@@ -72,18 +72,9 @@ Métodos: `bloquear(Instant)`, `vender()`, `liberar()`, `estaDisponible()`,
 | `telefonoMovil` | `String` |
 | `nacionalidad` | `String` |
 
-### `Cliente`
-
-| Campo | Tipo |
-|---|---|
-| `id` | `String` |
-| `nombreCompleto` | `String` |
-| `correoElectronico` | `String` |
-| `telefonoMovil` | `String` |
-| `nacionalidad` | `String` |
-
-Método: `correoEsValido()`. **No está en el enunciado**, es opcional. Si sobra tiempo se
-implementa; si no, se borra del diagrama.
+Método: `correoEsValido()`. **No está en el enunciado**: es un extra opcional que ya está
+dibujado en el diagrama de dominio; se implementa como validación trivial o se elimina de
+ambos lados para que el código y el diagrama no se contradigan.
 
 ### `OrdenCompra`
 
@@ -310,24 +301,54 @@ Casos de uso que los implementan:
 | Puerto | Implementado por |
 |---|---|
 | `CheckoutUseCase` | `IniciarCompra` |
-| `PagosUseCase` | `ConfirmarPago`, `ExpirarReservas` |
+| `PagosUseCase` | `ConfirmarPago` |
 | `ValidacionUseCase` | `ValidarBoleto` |
 | `MantenimientoUseCase` | `ExpirarReservas` |
 
 ---
 
-## 9. Los adaptadores y su estado
+## 9. Tipos de apoyo de los puertos
+
+Records que viajan en las firmas de los puertos. Se definen en el mismo paquete del puerto que
+los usa, para que el núcleo siga sin conocer tecnologías.
+
+### En `ports/in`
+
+```java
+record SolicitudCompra(String eventoId, String clienteId, List<String> asientosId) {}
+record IniciarCompraResponse(String ordenId, String codigoPago, String expiraEn) {}
+record ConfirmacionPago(String ordenId, String pasarela, String identificadorTransaccion) {}
+record NotificacionTransaccion(String identificadorTransaccion, boolean aprobado) {}
+record ResultadoValidacion(boolean valido, String motivo) {}
+```
+
+### En `ports/out`
+
+```java
+record RepresentacionBoleto(String codigo, String firmaHash, String url) {}
+record Notificacion(String destinatario, String mensaje) {}
+record Factura(String ordenId, String clienteId, BigDecimal monto) {}
+record Comprobante(String numero, String url) {}
+```
+
+> `SolicitudPago`, `ReferenciaPago` y `EstadoPago` ya están definidos en `ports/out` junto a
+> `PaymentGateway` (§7).
+
+---
+
+## 10. Los adaptadores y su estado
 
 | Adaptador | Puerto que implementa | Estado |
 |---|---|---|
 | `SqliteAsientoRepository` | `AsientoRepository` | **real** |
 | `MongoOrdenRepository` | `OrdenRepository` | **real** |
 | `MongoBoletoRepository` | `BoletoRepository` | **real** |
-| `QrTicketGenerator` | `TicketGenerator` | **real** |
+| `QrTicketGenerator` | `TicketGenerator` | mock |
 | `SistemaReloj` | `Reloj` | **real** |
 | `CheckoutController` | `CheckoutUseCase` | real |
 | `PagosController` | `PagosUseCase` | real |
 | `ValidacionController` | `ValidacionUseCase` | real |
+| `ReservasJob` | `MantenimientoUseCase` | real |
 | `WompiPaymentGateway` | `PaymentGateway` | mock |
 | `PayPalPaymentGateway` | `PaymentGateway` | mock |
 | `PsePaymentGateway` | `PaymentGateway` | mock |
@@ -335,8 +356,10 @@ Casos de uso que los implementan:
 | `WhatsappNotificador` | `Notificador` | mock |
 | `DianFacturaEmitter` | `FacturaEmitter` | mock |
 
-El enunciado exige **al menos 2 adaptadores completos**. Los reales son SQLite, MongoDB y el
-generador de QR con SHA-256.
+El enunciado exige **al menos 2 adaptadores completos**. Los reales son la persistencia dual
+(SQLite + MongoDB), el reloj del sistema, los controllers REST y el job de expiración. El
+generador de QR queda como mock: la firma SHA-256 del boleto la calcula `GeneradorFirma` en el
+dominio; al adaptador solo le toca producir la representación gráfica.
 
 > **Sobre SQLite en vez de MySQL.** El enunciado pide MySQL para el catálogo legacy. SQLite es
 > SQL estándar en un archivo, no necesita servidor y con datos dummy da el mismo resultado. En el
@@ -345,7 +368,7 @@ generador de QR con SHA-256.
 
 ---
 
-## 10. Las tres reglas que no se rompen
+## 11. Las tres reglas que no se rompen
 
 1. **En `domain/` no hay un solo `import` fuera de `java.*`.** Ni una anotación.
 2. **Ningún puerto menciona una tecnología.** Ni `String sql`, ni `HttpRequest`, ni
@@ -357,14 +380,14 @@ Si rompes alguna, el taller no cumple el enunciado y no hay arreglo después.
 
 ---
 
-## 11. Lo que todavía no existe
+## 12. Estado del arranque (día 0)
 
-Esto **no** está hecho y bloquea el arranque del proyecto:
+**Ya existe y está verificado:**
 
-- `pom.xml` y el esqueleto de `src/main/java/com/stagepass/`
-- `docker-compose.yml` con MongoDB
-- El endpoint `/ping` que usa el smoke test
-- Maven y Docker instalados en las máquinas
+- `pom.xml`, `mvnw` y el esqueleto `src/main/java/com/stagepass/` (Spring Boot 4.1.1, target Java 21).
+- `docker-compose.yml` con MongoDB.
+- `GET /ping` → 200 ("pong"), probado con la aplicación levantada.
+- `.\mvnw.cmd test` verde (incluye el contexto de Spring).
 
-Mientras eso falte, el smoke test del día 0 no se puede correr y nadie puede verificar que el
-proyecto arranque.
+Pendiente por máquina: abrir Docker Desktop para levantar Mongo cuando se trabajen los
+adaptadores de persistencia. El smoke test no lo necesita.
