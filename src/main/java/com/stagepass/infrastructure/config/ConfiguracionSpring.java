@@ -8,6 +8,7 @@ import com.stagepass.domain.service.CalculadoraTarifaria;
 import com.stagepass.domain.service.GeneradorFirma;
 import com.stagepass.domain.service.PoliticaExpiracion;
 import com.stagepass.domain.service.ValidadorLimites;
+import com.stagepass.infrastructure.in.job.ReservasJob;
 import com.stagepass.infrastructure.out.invoicing.DianFacturaEmitter;
 import com.stagepass.infrastructure.out.notification.SendgridNotificador;
 import com.stagepass.infrastructure.out.notification.WhatsappNotificador;
@@ -29,6 +30,8 @@ import com.stagepass.ports.out.OrdenRepository;
 import com.stagepass.ports.out.PaymentGateway;
 import com.stagepass.ports.out.Reloj;
 import com.stagepass.ports.out.TicketGenerator;
+import com.stagepass.ports.in.MantenimientoUseCase;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +54,7 @@ import java.util.Map;
  * son exactamente los valores que el front envia en el campo pasarela del checkout.
  */
 @Configuration
+@EnableScheduling
 public class ConfiguracionSpring {
 
     // ---- Puertos secundarios: persistencia y servicios externos --------------------
@@ -176,5 +180,10 @@ public class ConfiguracionSpring {
     public ExpirarReservas expirarReservas(@Lazy OrdenRepository ordenes, AsientoRepository asientos,
                                            PoliticaExpiracion politicaExpiracion, Reloj reloj) {
         return new ExpirarReservas(ordenes, asientos, politicaExpiracion, reloj);
+    }
+
+    @Bean
+    public ReservasJob reservasJob(MantenimientoUseCase mantenimiento) {
+        return new ReservasJob(mantenimiento);
     }
 }
