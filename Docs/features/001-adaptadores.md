@@ -1,6 +1,6 @@
 # 001 — Adaptadores de StagePass Live
 
-**status:** en-proceso | **updated:** 2026-10-16 | **owner:** diego (rama `feat/adaptadores`)
+**status:** cerrada | **updated:** 2026-10-16 | **owner:** diego (rama `feat/adaptadores`, PR con squash)
 
 ## Objetivo
 
@@ -39,7 +39,7 @@ congelados del núcleo (PR #1 mergeado en `main`), más la configuración Spring
 | `GET /api/v1/boletos/{codigo}` | → 200 `{codigo, valido, motivo}` |
 | `GET /ping` | → 200 "pong" (existente) |
 
-Errores: 400 validación, 401 orden no existe → 404, 409 reglas de negocio
+Errores: 400 validación, orden no existe → 404, 409 reglas de negocio
 (asiento no disponible / límite excedido / orden no pendiente / pasarela no registrada),
 410 orden vencida, 402 pago no verificado.
 
@@ -70,3 +70,15 @@ Errores: 400 validación, 401 orden no existe → 404, 409 reglas de negocio
 - `.\mvnw.cmd test` verde con los tests nuevos (unitarios + integración + E2E).
 - Flujo de demostración corriendo contra SQLite temporal + Mongo de Testcontainers.
 - CONTRATO y ADR al día; changelog del repo actualizado si aplica.
+
+## Evidencia (cierre)
+
+- `.\mvnw.cmd test` → **80 pruebas verdes**: dominio 22, ArchUnit 4 (reglas: dominio, puertos,
+  casos de uso, núcleo↛infraestructura), SQLite 11, Mongo 7 (contenedor real), web 13 (MockMvc),
+  job 2 (delegación + corrida real), E2E 1 (contenedor + SQLite temporal + reloj inyectado),
+  contexto Spring 1.
+- Ajustes del `auditor` aplicados: 400 ante JSON malformado (handler + test), índice único
+  probado por comportamiento, 409 por pasarela no registrada, corrida real del job, comentarios
+  corregidos y nota de producción para la clave de firma (ADR-0002 §7).
+- CONTRATO §10/§12 y ADR-0002 actualizados; entrega por PR `feat/adaptadores` → `main` con squash.
+
