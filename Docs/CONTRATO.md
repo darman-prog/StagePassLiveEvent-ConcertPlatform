@@ -371,6 +371,13 @@ El enunciado exige **al menos 2 adaptadores completos**. Los reales son la persi
 generador de QR queda como mock: la firma SHA-256 del boleto la calcula `GeneradorFirma` en el
 dominio; al adaptador solo le toca producir la representación gráfica.
 
+> **Estado al cierre de los adaptadores (oct-2026):** los 16 están implementados y probados en
+> la rama `feat/adaptadores`. Los reales: socios SQLite/Mongo, los 3 controllers REST, el
+> `ReservasJob` y el `SistemaReloj`; los mocks son deterministas (transacciones `OK-*` /
+> `RECHAZADA-*`) y el webhook responde 200 sin mover datos. La API vive bajo `/api/v1` con
+> errores `ProblemDetail` (RFC 7807): 400 validación, 404 no existe, 409 regla de negocio,
+> 410 orden vencida, 402 pago no verificado. Detalle de decisiones en `Docs/adr/0002-adaptadores-infraestructura.md`.
+
 > **Sobre SQLite en vez de MySQL.** El enunciado pide MySQL para el catálogo legacy. SQLite es
 > SQL estándar en un archivo, no necesita servidor y con datos dummy da el mismo resultado. En el
 > diagrama queda como catálogo legacy; cambiar a MySQL es una línea de configuración del
@@ -399,5 +406,8 @@ Si rompes alguna, el taller no cumple el enunciado y no hay arreglo después.
 - `GET /ping` → 200 ("pong"), probado con la aplicación levantada.
 - `.\mvnw.cmd test` verde (incluye el contexto de Spring).
 
-Pendiente por máquina: abrir Docker Desktop para levantar Mongo cuando se trabajen los
-adaptadores de persistencia. El smoke test no lo necesita.
+Los adaptadores están implementados: un arranque completo pide Mongo arriba
+(`docker compose up -d`). El smoke test de `/ping` funciona sin Docker, y los adaptadores
+Mongo suben **perezosos (`@Lazy`)** con inyección perezosa: el arranque no abre la base, el
+puerto falla solo si se usa de verdad. Los tests de integración usan Testcontainers con la
+imagen local `mongo:7`.
