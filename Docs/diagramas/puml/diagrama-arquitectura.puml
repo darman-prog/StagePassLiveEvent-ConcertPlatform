@@ -1,0 +1,145 @@
+﻿@startuml arquitectura
+' ============================================================================
+'  StagePass Live — Vista 1 de 3: ARQUITECTURA HEXAGONAL
+'  La forma canónica: driving a la izquierda, driven a la derecha, el hexágono
+'  en el centro y los puertos haciendo de frontera entre los dos.
+'
+'  CONVENCION DE FLECHAS (tomada del material del curso, Docs/13_-_Arquitectura_Hexagonal.md):
+'    --flecha punteada (..>) = USA / llamada. El flujo de ejecucion.
+'    --flecha solida (<|..)  = IMPLEMENTA. La dependencia de codigo.
+'
+'  El flujo de ejecucion va hacia AFUERA (el nucleo pide datos).
+'  La dependencia de codigo va hacia ADENTRO (el adaptador depende del puerto).
+'  Esa inversion es toda la arquitectura hexagonal.
+'
+'  Para regenerar (desde la raiz del repo, con plantuml.jar descargado):
+'    java -jar plantuml.jar -tpng -o ../png Docs/diagramas/puml/diagrama-arquitectura.puml
+'    java -jar plantuml.jar -tsvg -o ../svg Docs/diagramas/puml/diagrama-arquitectura.puml
+' ============================================================================
+
+left to right direction
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam ArrowFontSize 10
+skinparam classFontSize 12
+skinparam nodesep 14
+skinparam ranksep 45
+skinparam defaultFontSize 12
+
+' ============================ ACTORES ============================
+rectangle "Navegador web\nApp movil" as Web <<actor>> #EAEDED
+rectangle "Pasarela de pago\n(banco)" as Banco <<actor>> #EAEDED
+rectangle "CLI / tests\nJUnit" as Cli <<actor>> #EAEDED
+
+' ================== ADAPTADORES PRIMARIOS (driving) ==================
+rectangle "CheckoutController\nREST\n<<adaptador primario>>" as C1 #D5F5E3
+rectangle "PagosController\nwebhook\n<<adaptador primario>>" as C2 #D5F5E3
+rectangle "ValidacionController\nREST\n<<adaptador primario>>" as C3 #D5F5E3
+rectangle "ReservasJob\njob de expiracion\n<<adaptador primario>>" as C4 #D5F5E3
+
+' ===================== PUERTOS PRIMARIOS (frontera) =====================
+interface "CheckoutUseCase\n<<puerto primario>>" as P1 #D6EAF8
+interface "PagosUseCase\n<<puerto primario>>" as P2 #D6EAF8
+interface "ValidacionUseCase\n<<puerto primario>>" as P3 #D6EAF8
+interface "MantenimientoUseCase\n<<puerto primario>>" as P4 #D6EAF8
+
+' ============================== EL NUCLEO ==============================
+hexagon "NÚCLEO DE DOMINIO\n<<inside>>\n\n<i>domain.model</i>\nEvento · Asiento · Cliente\nOrdenCompra · Boleto\n\n<i>domain.service</i>\nCalculadoraTarifaria\nValidadorLimites\nGeneradorFirma\nPoliticaExpiracion\n\n<i>application</i>\nIniciarCompra · ConfirmarPago\nExpirarReservas · ValidarBoleto" as Core #FFE8CC
+
+' ==================== PUERTOS SECUNDARIOS (frontera) ====================
+interface "AsientoRepository\n<<puerto secundario>>" as S1 #D6EAF8
+interface "OrdenRepository\n<<puerto secundario>>" as S2 #D6EAF8
+interface "BoletoRepository\n<<puerto secundario>>" as S3 #D6EAF8
+interface "ClienteRepository\n<<puerto secundario>>" as S9 #D6EAF8
+interface "Reloj\n<<puerto secundario>>" as S8 #D6EAF8
+interface "PaymentGateway\n<<puerto secundario>>" as S4 #D6EAF8
+interface "TicketGenerator\n<<puerto secundario>>" as S5 #D6EAF8
+interface "Notificador\n<<puerto secundario>>" as S6 #D6EAF8
+interface "FacturaEmitter\n<<puerto secundario>>" as S7 #D6EAF8
+
+' =================== ADAPTADORES SECUNDARIOS (driven) ===================
+rectangle "SQLite\ncatálogo legacy\n(equivalente a MySQL)\n<<adaptador secundario>>" as A1 #D5F5E3
+rectangle "MongoDB\nórdenes y boletas\n<<adaptador secundario>>" as A2 #D5F5E3
+rectangle "QrTicketGenerator\nrepresentacion QR\n<<adaptador secundario>>\n<<mock>>" as A4 #D5F5E3
+rectangle "Wompi · PayPal · PSE\n<<adaptadores>>\n<<mock>>" as A3 #D5F5E3
+rectangle "Sendgrid · Whatsapp\n<<adaptadores>>\n<<mock>>" as A5 #D5F5E3
+rectangle "DianFacturaEmitter\n<<adaptador>>\n<<mock>>" as A6 #D5F5E3
+rectangle "SistemaReloj\nSystemClock\n<<adaptador secundario>>" as A8 #D5F5E3
+
+' ######################## FLUJOS DE ENTRADA ########################
+' La CLI es en si misma un adaptador primario: entra por el puerto, no por HTTP.
+Web ..> C1
+Banco ..> C2
+Cli ..> P1
+
+' ##### LOS ADAPTADORES PRIMARIOS IMPLEMENTAN LOS PUERTOS PRIMARIOS #####
+C1 ..|> P1
+C2 ..|> P2
+C3 ..|> P3
+C4 ..|> P4
+
+' ####### EL NUCLEO IMPLEMENTA LOS PUERTOS PRIMARIOS (flecha hacia dentro) #######
+P1 <|.. Core
+P2 <|.. Core
+P3 <|.. Core
+P4 <|.. Core
+
+' ####### EL NUCLEO USA LOS PUERTOS SECUNDARIOS (el flujo de salida) #######
+Core ..> S1
+Core ..> S2
+Core ..> S3
+Core ..> S9
+Core ..> S8
+Core ..> S4
+Core ..> S5
+Core ..> S6
+Core ..> S7
+
+' ####### LOS ADAPTADORES SECUNDARIOS IMPLEMENTAN LOS PUERTOS #######
+A1 ..|> S1
+A1 ..|> S9
+A2 ..|> S2
+A2 ..|> S3
+A8 ..|> S8
+A4 ..|> S5
+A3 ..|> S4
+A5 ..|> S6
+A6 ..|> S7
+
+note bottom of Core
+  <b>Regla de oro</b>
+  Ningún archivo de domain/, application/
+  ni ports/ puede importar Spring,
+  JDBC, Mongo, lombok ni SDKs externos.
+end note
+
+note bottom of P1
+  <b>El puerto es el contrato.</b>
+  Ambos lados dependen de él:
+  el núcleo lo declara y lo implementa,
+  el adaptador lo implementa.
+  Ninguno de los dos conoce al otro.
+end note
+
+note left of S4
+  <b>Un solo puerto, tres pasarelas.</b>
+  PayPal, Wompi y PSE son detalles técnicos.
+  El dominio solo conoce PaymentGateway.
+end note
+
+legend bottom
+  |= Color |= Capa |
+  | <#EAEDED> | Actores externos |
+  | <#D5F5E3> | Adaptadores (outside) |
+  | <#D6EAF8> | Puertos (frontera) |
+  | <#FFE8CC> | Núcleo (inside) |
+  --
+  <<mock>> = adaptador simulado
+  -- Flecha punteada = USA (llamada)
+  -- Flecha sólida = IMPLEMENTA
+  -- primario: entra al sistema
+  -- secundario: sale del sistema
+endlegend
+
+@enduml

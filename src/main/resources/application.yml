@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: stagepass
+
+  # Base relacional "legacy" para recintos y asientos. El driver SQLite no pide servidor:
+  # la base vive en un archivo local. Si el equipo decide migrar a MySQL solo cambia el
+  # adaptador de persistencia y este url; el dominio y los puertos no se tocan.
+  datasource:
+    url: jdbc:sqlite:stagepass.db
+    driver-class-name: org.sqlite.JDBC
+
+  # Mongo para ordenes de compra y boletos emitidas. En Spring Boot 4 la clave canonica
+  # es spring.mongodb.uri; la vieja spring.data.mongodb.uri quedo obsoleta.
+  mongodb:
+    uri: mongodb://localhost:27017/stagepass
+
+server:
+  port: 8080

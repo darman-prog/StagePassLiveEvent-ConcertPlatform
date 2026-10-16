@@ -1,0 +1,13 @@
+services:
+  # Mongo guarda ordenes de compra y boletas emitidas. Solo se necesita para los
+  # adaptadores de persistencia; el smoke test de /ping funciona sin levantarla.
+  mongo:
+    image: mongo:7
+    container_name: stagepass-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
