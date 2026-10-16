@@ -47,4 +47,16 @@ class PruebaAislamientoArquitectonicoTest {
                         "com.stagepass.ports..", "com.stagepass.application..")
                 .check(clases);
     }
+
+    @Test
+    void elNucleoNoDependeDeLaInfraestructura() {
+        // La flecha de dependencia apunta hacia afuera: si un caso de uso menciona un
+        // adaptador, la Dependency Rule quedo invertida y el taller pierde el merito.
+        noClasses()
+                .that().resideInAnyPackage("com.stagepass.domain..",
+                        "com.stagepass.ports..", "com.stagepass.application..")
+                .should().dependOnClassesThat()
+                .resideInAnyPackage("com.stagepass.infrastructure..")
+                .check(clases);
+    }
 }

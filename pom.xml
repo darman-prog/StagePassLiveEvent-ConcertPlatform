@@ -68,6 +68,14 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Tests de integracion Mongo sobre contenedores efimeros. La imagen mongo:7 ya
+			 esta en el cache local de Docker, asi que no descarga nada la primera vez. -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mongodb</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
