@@ -43,7 +43,7 @@ public class QrTicketGenerator implements TicketGenerator {
             byte[] hash = HexFormat.of().parseHex(firmaHash);
 
             // Matriz determinista: cada celda sale de un bit del hash, asi el dibujo es
-            // estable para una misma boleto y distinto entre boletas.
+            // estable para un mismo boleto y distinto entre boletas.
             for (int fila = 0; fila < MODULOS; fila++) {
                 for (int columna = 0; columna < MODULOS; columna++) {
                     int posicion = fila * MODULOS + columna;
@@ -53,7 +53,7 @@ public class QrTicketGenerator implements TicketGenerator {
             }
             ImageIO.write(imagen, "png", archivo.toFile());
         } catch (IOException e) {
-            // El dibujo es accesorio: si falla, el boleto siguen siendo valido sin imagen.
+            // El dibujo es accesorio: si falla, el boleto sigue siendo valido sin imagen.
             LOG.warn("[QR] no se pudo escribir la imagen {}: {}", archivo, e.getMessage());
         }
     }

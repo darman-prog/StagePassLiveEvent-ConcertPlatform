@@ -93,8 +93,9 @@ public class IniciarCompra implements CheckoutUseCase {
         OrdenCompra orden = new OrdenCompra(ordenId, solicitud.eventoId(), cliente, seleccionados,
                 resultado.tarifaServicio(), resultado.descuento(), resultado.montoTotal(), vencimiento);
 
-        // El bloqueo de las sillas y el guardado de la orden viajan juntos: el adaptador de
-        // persistencia los resuelve en una transaccion para que no quede silla bloqueada sin orden.
+        // El bloqueo de las sillas y el guardado de la orden viajan juntos, aunque sin
+        // transaccion unica entre SQLite y Mongo: riesgo aceptado y mitigado por el
+        // auto-liberado de bloqueos vencidos en el lector (ADR-0001/0002).
         asientos.bloquear(solicitud.asientosId(), vencimiento);
         ordenes.guardar(orden);
 

@@ -13,7 +13,7 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Adaptador secundario de resenas y ordenes de compra sobre MongoDB. Guarda documentos
+ * Adaptador secundario de ordenes de compra sobre MongoDB. Guarda documentos
  * propios y devuelve entidades del dominio; los estados activos y los vencidos son las
  * dos consultas calientes y llevan indice desde el arranque.
  */

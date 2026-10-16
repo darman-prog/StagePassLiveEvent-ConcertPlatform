@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Unico E2E del taller: compra -> bloqueo -> pago VERIFICADO -> boleto firmado ->
  * validacion en puerta -> vencimiento -> liberacion. Es la verificacion ADR-0001 y
- * corre contra contenedor real + SQLite temporal + reoj controlado por el test.
+ * corre contra contenedor real + SQLite temporal + reloj controlado por el test.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class FlujoCompletoE2ETest {

@@ -49,6 +49,9 @@ El enunciado exige al menos 2 adaptadores completos; el equipo optó por 4 reale
   local) y la doble escritura sigue sin transacción única (documentada, no bloqueante).
 - La validación HTTP usa los mensajes del núcleo para distinguir 404/409 en la excepción base:
   cambio aceptable sin inventar excepciones nuevas por contrato.
+- La clave de la firma viaja con valor demo por defecto en `application.yml`
+  (`STAGEPASS_CLAVE_SECRETA`). En un despliegue real la variable de entorno es obligatoria y el
+  arranque debería fallar sin ella, para que ningún boleto se firme con la clave de demo.
 
 ## Verificación
 

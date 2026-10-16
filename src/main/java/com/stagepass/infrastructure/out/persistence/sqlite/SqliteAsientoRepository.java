@@ -85,8 +85,8 @@ public class SqliteAsientoRepository implements AsientoRepository {
         if (asientosId.isEmpty()) {
             return;
         }
-        // Sin AND estado <> 'VENDIDO': si el barrido llegara tarde despues de un pago
-        // aprobado, no revenderia un boleto ya culminado el bloqueo vendido.
+        // Guarda contra la carrera: si el barrido llegara tarde despues de un pago
+        // aprobado, no debe revivir un asiento que ya quedo VENDIDO.
         String sql = "UPDATE asientos SET estado = 'DISPONIBLE', bloqueado_hasta = NULL "
                 + "WHERE id IN (" + marcasPara(asientosId.size()) + ") AND estado <> 'VENDIDO'";
         jdbc.update(sql, asientosId.toArray());
