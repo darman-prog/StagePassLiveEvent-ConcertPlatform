@@ -9,6 +9,11 @@ spring:
     url: jdbc:sqlite:stagepass.db
     driver-class-name: org.sqlite.JDBC
 
+  # Boot ejecuta schema.sql y data.sql en cada arranque; los scripts son idempotentes.
+  sql:
+    init:
+      mode: always
+
   # Mongo para ordenes de compra y boletos emitidas. En Spring Boot 4 la clave canonica
   # es spring.mongodb.uri; la vieja spring.data.mongodb.uri quedo obsoleta.
   mongodb:
