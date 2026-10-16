@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -57,6 +58,12 @@ public class ManejadorDeErrores {
                 .reduce((primero, segundo) -> primero + "; " + segundo)
                 .orElse("La peticion no cumple el formato");
         return problema(HttpStatus.BAD_REQUEST, "Peticion invalida", detalle);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail cuerpoIlegible(HttpMessageNotReadableException e) {
+        // Un JSON roto o un cuerpo vacio se resuelven en el borde con 400 y no caen en 500.
+        return problema(HttpStatus.BAD_REQUEST, "Peticion invalida", "El cuerpo no es un JSON valido o falta");
     }
 
     @ExceptionHandler(Exception.class)

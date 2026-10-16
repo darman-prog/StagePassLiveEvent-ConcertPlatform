@@ -115,6 +115,14 @@ class CheckoutControllerTest {
                 .andExpect(jsonPath("$.detail").value("La orden ORD-55 vencio"));
     }
 
+    @Test
+    void unCuerpoJsonMalformadoResponde400YNoCaeEn500() throws Exception {
+        mockMvc.perform(post("/api/v1/compras")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{eventoId roto"))
+                .andExpect(status().isBadRequest());
+    }
+
     /** Orden de laboratorio para el resumen: una VIP de 150000 + tarifa 10% = 165000. */
     private OrdenCompra ordenDePrueba() {
         Asiento vip = new Asiento("VIP-A1", "REC-01", "VIP-A1", new BigDecimal("150000.00"));
