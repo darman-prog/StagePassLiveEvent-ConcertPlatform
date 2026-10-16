@@ -97,6 +97,19 @@ class PagosControllerTest {
     }
 
     @Test
+    void confirmarConUnaPasarelaNoRegistradaResponde409() throws Exception {
+        when(pagos.confirmarPago(any()))
+                .thenThrow(new ExcepcionNegocio("La pasarela striper no esta registrada"));
+
+        mockMvc.perform(post("/api/v1/pagos/confirmar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"ordenId":"ORD-3","pasarela":"striper",
+                                 "identificadorTransaccion":"OK-1"}"""))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void elWebhookAcusaReciboYReenviaElAvisoAlPuerto() throws Exception {
         mockMvc.perform(post("/api/v1/pagos/webhook/wompi")
                         .contentType(MediaType.APPLICATION_JSON)

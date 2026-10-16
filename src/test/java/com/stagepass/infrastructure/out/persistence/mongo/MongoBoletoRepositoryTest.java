@@ -43,4 +43,14 @@ class MongoBoletoRepositoryTest {
     void buscarPorCodigoDevuelveNullCuandoElCodigoNoExiste() {
         assertThat(repo.buscarPorCodigo("SP-XXXXXXXX")).isNull();
     }
+
+    @Test
+    void elCodigoDeRedencionEsUnicoYRechazaUnSegundoBoletoIgual() {
+        repo.guardar(new Boleto("BLT-101", "ORD-101", "SP-DUP1234", "firma-a", EMISION));
+
+        // El indice unico del arranque es la segunda barrera frente a reentregas del webhook.
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> repo.guardar(new Boleto("BLT-102", "ORD-102", "SP-DUP1234", "firma-b", EMISION)))
+                .isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
+    }
 }
