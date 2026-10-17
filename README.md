@@ -5,6 +5,12 @@ El núcleo de dominio no conoce frameworks, HTTP ni bases de datos: solo reglas 
 puertos y casos de uso. Toda la tecnología (REST, SQLite, MongoDB, pasarelas) vive en
 adaptadores bajo `infrastructure/`.
 
+> 📌 **Navegación rápida para evaluación:**
+> - [📐 Ver Índice de Diagramas de Arquitectura](#-diagramas-de-arquitectura)
+> - [🌐 Uso de la Interfaz Web en vivo](#1-interfaz-web-httplocalhost8080)
+> - [🧪 Suite de Tests Automatizados](#tests)
+> - [📑 Decisiones Arquitectónicas (ADRs)](#documentación-y-decisiones-de-diseño)
+
 ## Requisitos
 
 - **JDK 21** (target del build; probado con Java 21.0.9).
@@ -109,7 +115,23 @@ com.stagepass
 - Dinero siempre en `BigDecimal` con redondeo en un solo punto; el tiempo llega por el puerto `Reloj`, nunca con `Instant.now()` suelto.
 - Adaptadores reales: REST, SQLite, MongoDB y reloj+job; los demás son mocks (ADR-0002).
 
-## Documentación
+## 📐 Diagramas de Arquitectura
 
-- Decisiones arquitectónicas: `Docs/adr/0001-arquitectura-nucleo.md` y `Docs/adr/0002-adaptadores-infraestructura.md`.
-- Diagramas: `Docs/diagramas/` — `puml/` fuente, `png/` y `svg/` exportados.
+Todos los diagramas del sistema se encuentran organizados y disponibles en el directorio [`Docs/diagramas/`](Docs/diagramas/). Se proveen en formato vectorial (**SVG** recomendado para máxima nitidez y zoom en GitHub), imágenes (**PNG**) y en código fuente editable (**PlantUML**):
+
+### Índice de Diagramas del Sistema
+
+| Diagrama | Descripción | Formato Vectorial (SVG) | Imagen (PNG) | Fuente (PlantUML) |
+|---|---|---|---|---|
+| **Arquitectura Hexagonal Global** | Vista completa de la arquitectura: Núcleo (Dominio), Casos de Uso (Application), Puertos In/Out y Adaptadores de Infraestructura (REST, SQLite, MongoDB, pasarelas mock, DIAN, SendGrid/WhatsApp). | [🔗 Ver arquitectura.svg](Docs/diagramas/svg/arquitectura.svg) | [🖼️ Ver arquitectura.png](Docs/diagramas/png/arquitectura.png) | [📄 Ver .puml](Docs/diagramas/puml/diagrama-arquitectura.puml) |
+| **Modelo de Dominio** | Entidades puras (`Evento`, `Asiento`, `Cliente`, `OrdenCompra`, `Boleto`), Value Objects, Excepciones de negocio y Servicios de Dominio (tarifas, límites, expiración, firma SHA-256) sin dependencias tecnológicas. | [🔗 Ver dominio.svg](Docs/diagramas/svg/dominio.svg) | [🖼️ Ver dominio.png](Docs/diagramas/png/dominio.png) | [📄 Ver .puml](Docs/diagramas/puml/diagrama-dominio.puml) |
+| **Contratos y Flujo de Interacción** | Diagrama de secuencia y contratos entre capas: checkout, bloqueo de sillas por 10 min, confirmación con pasarela, emisión de boleto y validación en puerta. | [🔗 Ver contratos.svg](Docs/diagramas/svg/contratos.svg) | [🖼️ Ver contratos.png](Docs/diagramas/png/contratos.png) | [📄 Ver .puml](Docs/diagramas/puml/diagrama-contratos.puml) |
+
+> 💡 **Tip para visualización:** Al hacer clic en los enlaces **SVG**, GitHub renderiza los diagramas con escalabilidad vectorial perfecta a cualquier nivel de zoom.
+
+## Documentación y Decisiones de Diseño
+
+- **Decisiones Arquitectónicas (ADRs):**
+  - [ADR-0001: Arquitectura del Núcleo y Puertos](Docs/adr/0001-arquitectura-nucleo.md)
+  - [ADR-0002: Adaptadores de Infraestructura y Mocks](Docs/adr/0002-adaptadores-infraestructura.md)
+- **Directorio de Diagramas:** [`Docs/diagramas/`](Docs/diagramas/)
