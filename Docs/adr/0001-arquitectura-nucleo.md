@@ -42,7 +42,6 @@ los restantes pueden ser mocks".
 5. **SQLite en lugar de MySQL:** el enunciado menciona MySQL legacy. Se elige SQLite para eliminar la
    dependencia de un servidor relacional en el desarrollo; el puerto `AsientoRepository` abstrae el
    almacenamiento, así que migrar a MySQL es añadir una clase adaptadora nueva (sin tocar núcleo).
-   Si el docente exige MySQL real, se agrega `mysql-connector-j` + servicio en `docker-compose.yml`.
 
 ## Consecuencias
 
