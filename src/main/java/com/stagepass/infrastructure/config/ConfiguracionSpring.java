@@ -3,6 +3,7 @@ package com.stagepass.infrastructure.config;
 import com.stagepass.application.ConfirmarPago;
 import com.stagepass.application.ExpirarReservas;
 import com.stagepass.application.IniciarCompra;
+import com.stagepass.application.ListarAsientos;
 import com.stagepass.application.ValidarBoleto;
 import com.stagepass.domain.service.CalculadoraTarifaria;
 import com.stagepass.domain.service.GeneradorFirma;
@@ -39,6 +40,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Map;
 
@@ -180,6 +183,22 @@ public class ConfiguracionSpring {
     public ExpirarReservas expirarReservas(@Lazy OrdenRepository ordenes, AsientoRepository asientos,
                                            PoliticaExpiracion politicaExpiracion, Reloj reloj) {
         return new ExpirarReservas(ordenes, asientos, politicaExpiracion, reloj);
+    }
+
+    @Bean
+    public ListarAsientos listarAsientos(AsientoRepository asientos) {
+        return new ListarAsientos(asientos);
+    }
+
+    @Bean
+    public WebMvcConfigurer recursosQrConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+                registry.addResourceHandler("/qr/**")
+                        .addResourceLocations("file:target/qr/");
+            }
+        };
     }
 
     @Bean

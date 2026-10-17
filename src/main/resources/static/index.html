@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StagePass Live — Plataforma de Venta de Entradas</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <!-- Encabezado Principal de Alta Fidelidad -->
+    <header class="header-principal">
+        <div class="marca">
+            <svg class="marca__simbolo" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span class="marca__titulo">StagePass Live</span>
+            <span class="marca__separador" aria-hidden="true">/</span>
+            <span class="marca__evento">Concierto de prueba · EV-001</span>
+        </div>
+
+        <nav class="tabs-nav" role="tablist" aria-label="Navegación principal">
+            <button type="button" id="tab-comprar" class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-comprar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+                <span>Comprar boletos</span>
+            </button>
+            <button type="button" id="tab-puerta" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-puerta">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                    <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                    <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                    <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                    <line x1="7" y1="12" x2="17" y2="12"></line>
+                </svg>
+                <span>Control de acceso</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Contenedor de Vistas -->
+    <main class="contenedor-principal">
+
+        <!-- Vista 1: Comprar Boletos (#comprar) -->
+        <section id="panel-comprar" class="panel-vista" role="tabpanel" aria-labelledby="tab-comprar">
+            <div class="grid-compra">
+
+                <!-- Columna Izquierda: Mapa de Asientos del Recinto -->
+                <div class="card card--mapa">
+                    <div class="card__header">
+                        <div class="card__identificador">
+                            <h2 class="card__titulo">Distribución del Recinto</h2>
+                            <span class="card__subtitulo">Selecciona asientos contiguos disponibles</span>
+                        </div>
+
+                        <button type="button" id="btn-actualizar-mapa" class="btn-icon-subtle" title="Sincronizar disponibilidad con el servidor" aria-label="Actualizar mapa">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                            </svg>
+                            <span>Sincronizar</span>
+                        </button>
+                    </div>
+
+                    <!-- Controles de Comprador y Recinto -->
+                    <div class="barra-filtros">
+                        <div class="campo-filtro">
+                            <label for="select-cliente">Comprador registrado</label>
+                            <div class="select-wrapper">
+                                <select id="select-cliente" class="input-select">
+                                    <option value="CL-001" selected>CL-001 · Camila Osorio (Colombia)</option>
+                                    <option value="CL-002">CL-002 · Andres Villalba (Colombia)</option>
+                                    <option value="CL-003">CL-003 · Luisa Mendez (Perú)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="campo-filtro">
+                            <label for="select-recinto">Recinto</label>
+                            <div class="select-wrapper">
+                                <select id="select-recinto" class="input-select">
+                                    <option value="REC-01" selected>REC-01 · Arena Central (Tribuna & General)</option>
+                                    <option value="REC-02">REC-02 · Palacio de Cristal (Palcos Corporativos)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Arena y Escenario Arquitectónico -->
+                    <div class="arena-contenedor">
+                        <div class="escenario-arquitectonico" aria-hidden="true">
+                            <span class="escenario-arquitectonico__linea"></span>
+                            <span class="escenario-arquitectonico__etiqueta">ESCENARIO // STAGE</span>
+                            <span class="escenario-arquitectonico__linea"></span>
+                        </div>
+
+                        <!-- Grilla interactiva de asientos inyectada dinámicamente -->
+                        <div id="mapa-asientos" class="zona-asientos" aria-live="polite">
+                            <!-- Skeleton loader inicial -->
+                            <div class="grilla-asientos">
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                                <div class="skeleton-asiento"></div>
+                            </div>
+                        </div>
+
+                        <!-- Leyenda de Estados del Mapa -->
+                        <div class="leyenda-mapa" aria-label="Leyenda de estados de asientos">
+                            <div class="leyenda-item">
+                                <span class="leyenda-item__color leyenda-item__color--libre" aria-hidden="true"></span>
+                                <span>Disponible</span>
+                            </div>
+                            <div class="leyenda-item">
+                                <span class="leyenda-item__color leyenda-item__color--seleccionado" aria-hidden="true"></span>
+                                <span>Seleccionado</span>
+                            </div>
+                            <div class="leyenda-item">
+                                <span class="leyenda-item__color leyenda-item__color--tuyo" aria-hidden="true"></span>
+                                <span>Tu reserva (10 min)</span>
+                            </div>
+                            <div class="leyenda-item">
+                                <span class="leyenda-item__color leyenda-item__color--bloqueado" aria-hidden="true"></span>
+                                <span>Bloqueado por otro</span>
+                            </div>
+                            <div class="leyenda-item">
+                                <span class="leyenda-item__color leyenda-item__color--vendido" aria-hidden="true"></span>
+                                <span>Vendido</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Orden, Pago y Boleto Emitido -->
+                <aside class="columna-checkout">
+
+                    <!-- Card "Tu orden" -->
+                    <div id="card-orden" class="card card--checkout">
+                        <div class="card__header">
+                            <div class="card__identificador">
+                                <h2 class="card__titulo">Resumen de Orden</h2>
+                                <span id="contador-asientos-badge" class="badge-asientos">0 de 6 permitidos</span>
+                            </div>
+                            <button type="button" id="btn-nueva-compra" class="btn-secundario-sm" style="display: none;">
+                                Nueva compra
+                            </button>
+                        </div>
+
+                        <!-- Asientos seleccionados -->
+                        <div id="orden-asientos-seleccionados" class="orden-asientos-chips" aria-live="polite">
+                            <span class="placeholder-vacio">Selecciona entre 1 y 6 asientos en el mapa para iniciar.</span>
+                        </div>
+
+                        <!-- Temporizador regresivo (visible solo con orden activa) -->
+                        <div id="caja-temporizador" class="caja-temporizador" style="display: none;">
+                            <div class="caja-temporizador__meta">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                <span>Vence en:</span>
+                            </div>
+                            <div id="contador-reloj" class="contador-reloj" aria-live="polite">10:00</div>
+                        </div>
+
+                        <!-- Desglose de precios oficiales del núcleo -->
+                        <table class="tabla-desglose">
+                            <tbody>
+                                <tr>
+                                    <td>Subtotal base</td>
+                                    <td id="resumen-subtotal">$0.00</td>
+                                </tr>
+                                <tr id="fila-tarifa" style="display: none;">
+                                    <td>Tarifa de servicio (+)</td>
+                                    <td id="resumen-tarifa">$0.00</td>
+                                </tr>
+                                <tr id="fila-descuento" style="display: none;">
+                                    <td>Descuento aplicado (−)</td>
+                                    <td id="resumen-descuento">$0.00</td>
+                                </tr>
+                                <tr class="fila-total">
+                                    <td>Total a pagar</td>
+                                    <td id="resumen-total">$0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- CTA Iniciar Compra -->
+                        <button type="button" id="btn-iniciar-compra" class="btn-cta" disabled>
+                            <span>Iniciar reserva y bloquear asientos</span>
+                        </button>
+
+                        <div id="pago-codigo-badge" class="codigo-orden-box" style="display: none;">
+                            <span class="codigo-orden-box__etiqueta">ID de Pago:</span>
+                            <strong id="valor-codigo-pago" class="codigo-orden-box__valor">PAY-...</strong>
+                        </div>
+                    </div>
+
+                    <!-- Card Sección de Pago (visible con orden activa) -->
+                    <div id="card-pago" class="card card--pago" style="display: none;">
+                        <div class="card__header">
+                            <div class="card__identificador">
+                                <h2 class="card__titulo">Confirmación de Pago</h2>
+                                <span class="card__subtitulo">Pasarela mock y verificación</span>
+                            </div>
+                        </div>
+
+                        <div class="seccion-pasarelas">
+                            <label class="etiqueta-campo">Selecciona método de pago</label>
+                            <div class="selector-pasarelas" role="radiogroup" aria-label="Pasarela de pago">
+                                <div class="pasarela-opcion" role="radio" aria-checked="true" data-pasarela="wompi" tabindex="0">
+                                    <span class="pasarela-opcion__nombre">Wompi</span>
+                                    <span class="pasarela-opcion__sub">Bancolombia</span>
+                                </div>
+                                <div class="pasarela-opcion" role="radio" aria-checked="false" data-pasarela="paypal" tabindex="0">
+                                    <span class="pasarela-opcion__nombre">PayPal</span>
+                                    <span class="pasarela-opcion__sub">Internacional</span>
+                                </div>
+                                <div class="pasarela-opcion" role="radio" aria-checked="false" data-pasarela="pse" tabindex="0">
+                                    <span class="pasarela-opcion__nombre">PSE</span>
+                                    <span class="pasarela-opcion__sub">Débito ACH</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="campo-transaccion">
+                            <label for="input-transaccion" class="etiqueta-campo">Referencia de transacción</label>
+                            <input type="text" id="input-transaccion" class="input-texto" value="OK-777" placeholder="Identificador de transacción">
+                        </div>
+
+                        <!-- Panel de Simulación para la Defensa Académica -->
+                        <div class="panel-simulacion" aria-label="Escenarios de prueba">
+                            <span class="panel-simulacion__titulo">Escenarios de prueba:</span>
+                            <div class="chips-simulacion">
+                                <button type="button" class="chip-sim chip-sim--ok" data-fill="OK-777">Aprobar (OK-777)</button>
+                                <button type="button" class="chip-sim chip-sim--rechazada" data-fill="RECHAZADA-777">Rechazar (402)</button>
+                                <button type="button" class="chip-sim" data-fill="PENDIENTE-999">Pendiente (402)</button>
+                            </div>
+                        </div>
+
+                        <div class="acciones-pago">
+                            <button type="button" id="btn-confirmar-pago" class="btn-cta">
+                                <span>Confirmar pago</span>
+                            </button>
+                            <button type="button" id="btn-simular-webhook" class="btn-secundario" title="Simula el webhook asíncrono no-op de la pasarela">
+                                Probar webhook asíncrono
+                            </button>
+                        </div>
+
+                        <!-- Alertas de error de pago (RFC 7807) -->
+                        <div id="alerta-pago" class="alerta-caja" role="alert" style="display: none;">
+                            <div class="alerta-caja__header">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <span id="alerta-pago-titulo">Pago no verificado</span>
+                            </div>
+                            <div id="alerta-pago-detalle" class="alerta-caja__cuerpo">Detalle del error.</div>
+                            <div id="alerta-pago-pista" class="alerta-caja__pista" style="display: none;">
+                                Tip de demo: utiliza la referencia <strong>OK-777</strong> para simular una transacción exitosa.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card E-Ticket Emitido (post-pago exitoso) -->
+                    <div id="card-boleto" class="eticket" style="display: none;">
+                        <div class="eticket__header">
+                            <span class="eticket__categoria">Boleto Digital Oficial</span>
+                            <div id="boleto-codigo" class="eticket__codigo-redencion">SP-XXXXXXXX</div>
+                        </div>
+
+                        <div class="eticket__qr-contenedor">
+                            <div class="eticket__qr-marco">
+                                <img id="boleto-qr-img" class="eticket__qr-img" src="" alt="Código QR del boleto emitido">
+                                <div id="boleto-qr-fallback" class="eticket__qr-fallback" style="display: none;">
+                                    <span>QR generado en servidor</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="eticket__perforacion" aria-hidden="true"></div>
+
+                        <div class="eticket__metadatos">
+                            <div class="eticket__fila-meta">
+                                <span class="eticket__label">Firma SHA-256:</span>
+                                <div class="eticket__firma-box">
+                                    <span id="boleto-firma-corta">000000...</span>
+                                    <button type="button" id="btn-copiar-firma" class="btn-copiar" title="Copiar firma al portapapeles">
+                                        Copiar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="eticket__fila-meta">
+                                <span class="eticket__label">Emisión:</span>
+                                <span id="boleto-fecha" class="eticket__valor">--</span>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btn-ir-validar" class="btn-cta btn-cta--verificar">
+                            <span>Validar en puerta</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+
+                </aside>
+
+            </div>
+        </section>
+
+        <!-- Vista 2: Validar en Puerta (#puerta) -->
+        <section id="panel-puerta" class="panel-vista" role="tabpanel" aria-labelledby="tab-puerta" hidden>
+            <div class="card escaner-contenedor">
+                <div class="card__header">
+                    <div class="card__identificador">
+                        <h2 class="card__titulo">Control de Acceso</h2>
+                        <span class="card__subtitulo">Validación criptográfica en puerta</span>
+                    </div>
+                </div>
+
+                <div class="campo-transaccion">
+                    <label for="input-codigo-boleto" class="etiqueta-campo">Código de redención</label>
+                    <div class="escaner-input-grupo">
+                        <input type="text" id="input-codigo-boleto" class="input-texto input-escaner" placeholder="SP-XXXXXXXX">
+                        <button type="button" id="btn-validar-puerta" class="btn-cta btn-cta--escanear">
+                            Validar
+                        </button>
+                    </div>
+
+                    <div class="panel-simulacion" style="margin-top: 12px;">
+                        <span class="panel-simulacion__titulo">Casos de validación:</span>
+                        <div class="chips-simulacion">
+                            <button type="button" id="btn-atajo-ultimo-boleto" class="chip-sim chip-sim--ok" style="display: none;">
+                                Último boleto emitido
+                            </button>
+                            <button type="button" class="chip-sim chip-sim--rechazada" data-puerta-fill="SP-ALTERADO99">
+                                Boleto alterado (Firma inválida)
+                            </button>
+                            <button type="button" class="chip-sim" data-puerta-fill="SP-NOEXISTE00">
+                                Código inexistente (404)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultado del Veredicto en Puerta -->
+                <div id="veredicto-puerta" aria-live="polite">
+                    <div class="veredicto-card veredicto--inicial">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <div class="veredicto__motivo">
+                            Ingresa el código del boleto para verificar su autenticidad y estado de pago en el núcleo.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Región de Notificaciones Toast Accesibles -->
+    <div id="toasts" class="toast-contenedor" aria-live="polite"></div>
+
+    <!-- Franja "Arquitectura en Vivo" (Consola de Ingeniería al pie) -->
+    <footer class="franja-arquitectura" aria-label="Traza de arquitectura en vivo">
+        <div class="franja-arquitectura__prefijo">
+            <span class="franja-arquitectura__tag">HEXAGONAL TRACE</span>
+        </div>
+        <div id="franja-cadena" class="franja-arquitectura__cadena">
+            GET /ping → PingController → 200
+        </div>
+        <div class="franja-arquitectura__status">
+            <span id="franja-status" class="status-pill">HTTP 200</span>
+        </div>
+    </footer>
+
+    <!-- Lógica de la aplicación en JS modular -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
