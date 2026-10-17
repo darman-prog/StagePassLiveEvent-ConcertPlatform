@@ -84,10 +84,8 @@ com.stagepass
 
 ## Documentación
 
-- Contrato del equipo (firmas y tipos exactos): `Docs/CONTRATO.md`.
 - Decisiones arquitectónicas: `Docs/adr/0001-arquitectura-nucleo.md` y
   `Docs/adr/0002-adaptadores-infraestructura.md`.
-- Especificación cerrada del trabajo de adaptadores: `Docs/features/001-adaptadores.md`.
 - Diagramas: `Docs/diagramas/` — `puml/` fuente, `png/` y `svg/` exportados.
 
 ## Demo (defensa)

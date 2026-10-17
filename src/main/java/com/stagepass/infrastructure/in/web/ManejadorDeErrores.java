@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Traduccion de las excepciones del nucleo a HTTP con criterio (CONTRATO §5). El cuerpo
+ * Traduccion de las excepciones del nucleo a HTTP con criterio. El cuerpo
  * es ProblemDetail RFC 7807; el campo detail lleva el mensaje de negocio del nucleo.
  */
 @RestControllerAdvice
